@@ -19,7 +19,12 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Allow requests from the frontend dev server
-app.use(cors({ origin: 'http://localhost:3001' }))
+app.use(cors({
+  origin: [
+    'http://localhost:3001',
+    'https://api-drift-observatory.vercel.app'
+  ]
+}))
 
 // Middleware: parse incoming JSON request bodies
 // Without this, req.body would always be undefined
