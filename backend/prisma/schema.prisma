@@ -1,0 +1,58 @@
+// schema.prisma — Defines the database structure for API Drift Observatory.
+//
+// Each `model` here becomes a table in PostgreSQL.
+// Prisma reads this file to generate the database migration and the TypeScript client.
+// Think of this as the single source of truth for your data shape.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id        String     @id @default(uuid())
+  email     String     @unique
+  password  String
+  endpoints Endpoint[]
+  createdAt DateTime   @default(now())
+}
+
+model Endpoint {
+  id            String     @id @default(uuid())
+  userId        String
+  user          User       @relation(fields: [userId], references: [id])
+  name          String
+  url           String
+  method        String     @default("GET")
+  headers       Json?
+  tsInterface   String?
+  webhookUrl    String?
+  notifyEmail   Boolean    @default(true)
+  pollInterval  Int        @default(60)
+  lastCheckedAt DateTime?
+  snapshots     Snapshot[]
+  alerts        Alert[]
+  createdAt     DateTime   @default(now())
+}
+
+model Snapshot {
+  id         String   @id @default(uuid())
+  endpointId String
+  endpoint   Endpoint @relation(fields: [endpointId], references: [id])
+  shape      Json
+  takenAt    DateTime @default(now())
+}
+
+model Alert {
+  id         String   @id @default(uuid())
+  endpointId String
+  endpoint   Endpoint @relation(fields: [endpointId], references: [id])
+  type       String
+  diff       Json
+  seen       Boolean  @default(false)
+  createdAt  DateTime @default(now())
+}
